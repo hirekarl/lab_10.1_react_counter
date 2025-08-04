@@ -93,7 +93,7 @@ const Counter = () => {
           <Button
             variant="secondary"
             onClick={handleDecrement}
-            disabled={count === MIN_COUNT}>
+            disabled={count <= MIN_COUNT}>
             - Decrement
           </Button>
           <Button variant="primary" onClick={handleIncrement}>
