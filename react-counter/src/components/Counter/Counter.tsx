@@ -5,16 +5,19 @@ import type { status } from "../../types"
 const Counter = () => {
   const MIN_COUNT = 0
   const MIN_STEP_VALUE = 1
-  const LOCAL_STORAGE_DELAY = 250 // ms
 
   const [count, setCount] = useState<number>(MIN_COUNT)
   const [stepValue, setStepValue] = useState<number>(MIN_STEP_VALUE)
   const [countHistory, setCountHistory] = useState<number[]>([MIN_COUNT])
-  const [status, setStatus] = useState<status>("")
+  const [status, setStatus] = useState<status>("Saving to localStorage...")
 
+  // These handlers need to be wrapped in useCallback to
+  // - use for both mouse and keyboard events
+  // - memoize and update only on change in stepValue
   const handleDecrement = useCallback((): void => {
     setCount((prevCount) =>
-      prevCount === MIN_COUNT ? MIN_COUNT : prevCount - stepValue
+      // Don't ever let count go below MIN_COUNT
+      prevCount - stepValue <= MIN_COUNT ? MIN_COUNT : prevCount - stepValue
     )
   }, [stepValue])
 
@@ -31,38 +34,32 @@ const Counter = () => {
   const handleStepValueChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ): void => {
-    setStepValue(parseInt(event.target.value))
+    const newStepValue = parseInt(event.target.value)
+    setStepValue(newStepValue > MIN_STEP_VALUE ? newStepValue : MIN_STEP_VALUE)
   }
 
+  // Update countHistory
   useEffect(() => {
+    // Prevent double registering of first history item.
     if (countHistory[countHistory.length - 1] !== count) {
       setCountHistory((prevCountHistory) => [...prevCountHistory, count])
     }
   }, [count, countHistory])
 
+  // Save countHistory to localStorage as item with key "counts"
   useEffect(() => {
+    // Not sure I need this setStatus right here?
+    // But also not sure where else it would go...
     setStatus("Saving to localStorage...")
     try {
       localStorage.setItem("counts", JSON.stringify(countHistory))
+      setStatus("Changes saved.")
     } catch (error) {
       setStatus(String(error))
     }
   }, [countHistory])
 
-  useEffect(() => {
-    const localStorageCounts = localStorage.getItem("counts")
-    if (localStorageCounts) {
-      if (JSON.parse(localStorageCounts).length === countHistory.length) {
-        // Artificially introduced a delay here to see the status text.
-        setTimeout(() => {
-          setStatus("Changes saved.")
-        }, LOCAL_STORAGE_DELAY)
-      }
-    } else {
-      setStatus("There was a problem saving to localStorage.")
-    }
-  }, [countHistory])
-
+  // Set up event listeners for keyboard events
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === "ArrowUp") handleIncrement()
@@ -75,8 +72,9 @@ const Counter = () => {
     }
   }, [handleIncrement, handleDecrement])
 
-  const countHistoryList = countHistory.map((c, i) => (
-    <ListGroup.Item key={i}>{c}</ListGroup.Item>
+  // Map the counts in countHistory as Bootstrap List Group Items
+  const countHistoryList = countHistory.map((count, index) => (
+    <ListGroup.Item key={index}>{count}</ListGroup.Item>
   ))
 
   return (
@@ -117,7 +115,7 @@ const Counter = () => {
                 id="step-value-input"
                 type="number"
                 className="form-control"
-                min={0}
+                min={MIN_STEP_VALUE}
                 onChange={handleStepValueChange}
                 value={stepValue}
               />
