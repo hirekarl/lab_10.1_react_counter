@@ -53,6 +53,7 @@ const Counter = () => {
     const localStorageCounts = localStorage.getItem("counts")
     if (localStorageCounts) {
       if (JSON.parse(localStorageCounts).length === countHistory.length) {
+        // Artificially introduced a delay here to see the status text.
         setTimeout(() => {
           setStatus("Changes saved.")
         }, LOCAL_STORAGE_DELAY)
