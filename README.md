@@ -17,7 +17,7 @@ cd react-counter && npm i && npm run dev
 2. Navigate in the browser to http://localhost:5173.
 
 ### Submission Source
-Counter app behavior can be found in [`./react-counter/src/components/Counter.tsx`](./react-counter/src/components/Counter.tsx).
+Counter app behavior can be found in [`./react-counter/src/components/Counter/Counter.tsx`](./react-counter/src/components/Counter/Counter.tsx).
 
 ### Reflection
 The main challenge I faced with this lab had to do with a) making sure the Count History didn't show with two `0` items on initial load, which is a side effect of `StrictMode`; b) handling the logic to ensure `count` can never go below 0; and c) implementing the `KeyboardEvent` event handlers.
