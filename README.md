@@ -20,17 +20,23 @@ cd react-counter && npm i && npm run dev
 Counter app behavior can be found in [`./react-counter/src/components/Counter.tsx`](./react-counter/src/components/Counter.tsx).
 
 ### Reflection
-1. How did you handle optional props in your components?
-> TODO
+The main challenge I faced with this lab had to do with a) making sure the Count History didn't show with two `0` items on initial load, which is a side effect of `StrictMode`; b) handling the logic to ensure `count` can never go below 0; and c) implementing the `KeyboardEvent` event handlers.
 
-2. What considerations did you make when designing the component interfaces?
-> TODO
+The first item involved thinking about how to ensure the `countHistory` is updated only if the current value is different from the last value. This involved both making sure conditions were such that any action taken on `Counter` changes the value of `count`, and adding an `if` guard in the associated `useEffect` to only change `count` if the `countHistory[countHistory.length - 1]` is different from `count`.
 
-3. How did you ensure type safety across your components?
-> TODO
+The second item amounted to finding this logic:
 
-4. What challenges did you face when implementing component composition?
-> TODO
+```typescript
+const handleDecrement = useCallback((): void => {
+  setCount((prevCount) =>
+    prevCount - stepValue <= MIN_COUNT ? MIN_COUNT : prevCount - stepValue
+  )
+}, [stepValue])
+```
+
+Figuring out the `KeyboardEvent` handling amounted to researching `KeyboardEvent` on MDN and figuring out that the event listeners needed to be placed on the `window` element.
+
+At present, the `"Saving to localStorage..."` message never shows. Part of this has to do with the fact that `setStatus` gets called twice within the same `useEffect` block; another is that saving to `localStorage` is very fast. With more time, I'd like to figure out how to make that feature more visually interesting.
 
 ## Assignment
 In this lab, you will create a set of reusable UI components for your company’s internal component library. You will practice creating TypeScript React components with proper prop typing, component composition, and prop handling. This lab focuses on component creation, TypeScript interfaces, prop handling, and component composition using React and TypeScript.
